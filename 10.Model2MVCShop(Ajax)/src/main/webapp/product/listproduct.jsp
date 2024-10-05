@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
     pageEncoding="EUC-KR"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="EUC-KR">
@@ -9,7 +9,8 @@
 
 <link rel="stylesheet" href="/css/admin.css" type="text/css">
 
-<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<!-- CDN(Content Delivery Network) 호스트 사용 -->
+	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script type="text/javascript">
 	function fncGetProductList(currentPage) {
 		//document.getElementById("currentPage").value = currentPage;
@@ -33,24 +34,62 @@
 			//==> DOM Object GET 3가지 방법 ==> 1. $(tagName) : 2.(#id) : 3.$(.className)
 			//==> 3 과 1 방법 조합 : $(".className tagName:filter함수") 사용함.
 			$( ".ct_list_pop td:nth-child(3)" ).on("click" , function() {
+				var prodNo = $(this).closest("tr").data("prodno");
 					//Debug..
 					//alert(  $( this ).text().trim() );${vo.prodNo}
 					//self.location ="/product/getProduct?prodNo="+$(this).text().trim()+"&menu=${menu}";
 				//self.location ="/product/getProduct?prodNo="+$(this).text().trim()+"&menu=${menu}";
 				//현: $(this).text() 이건 클릭한 상품명을 반환하니 바꿈
+				var doubleClick = $("#"+prodNo);//현:더블클릭 닫치기 추가 jquery에 prodNo에 해당하는 id를 가진게 있으면 선택
+				if(doubleClick.children().length>0){//현:이미 정보가 있는 경우 해당 자식이 있으면 0 초가니
+					doubleClick.empty();//현:제거
+				}
+				else{
 				<c:if test="${menu == 'manage'}">
-				self.location = "/product/updateProductView?prodNo=" + $(this).closest("tr").data("prodno") + "&menu=${menu}";
+				self.location = "/product/updateProductView?prodNo=" + prodNo + "&menu=${menu}";
 				</c:if>
 				<c:if test="${menu == 'search'}">
-				self.location = "/product/getProduct?prodNo=" + $(this).closest("tr").data("prodno") + "&menu=${menu}";
+				var prodNo = $(this).closest("tr").data("prodno");
+				$.ajax( 
+						{
+							url : "/product/json/getProduct/"+prodNo ,
+							method : "GET" ,
+							dataType : "json" ,
+							headers : {
+								"Accept" : "application/json",
+								"Content-Type" : "application/json"
+							},
+							success : function(JSONData , status) {
+
+								//Debug...
+								//alert(status);
+								//Debug...
+								//alert("JSONData : \n"+JSONData);
+								
+								var displayValue = "<h3>"
+															+"상품번호 : "+JSONData.prodNo+"<br/>"
+															+"상품명: "+JSONData.prodName+"<br/>"
+															+"상품상세정보 : "+JSONData.prodDetail+"<br/>"
+															+"가격 : "+JSONData.price+"<br/>"
+															+"제조일자: "+JSONData.manuDate+"<br/>"
+															+"등록일 : "+JSONData.regDateString+"<br/>"
+															+"상품이미지 : "+JSONData.fileName+"<br/>"
+															+"</h3>";
+								//Debug...									
+								//alert(displayValue);
+								$("h3").remove();
+								$( "#"+prodNo+"" ).html(displayValue);
+							}
+					});
+				//self.location = "/product/getProduct?prodNo=" + $(this).closest("tr").data("prodno") + "&menu=${menu}";
 				</c:if>
+				}
 				
 			});
 			$( ".ct_list_pop td:nth-child(3)" ).css("color" , "red");
 			$("h7").css("color" , "red");
-			
-			$(".ct_list_pop:nth-child(4n+6)" ).css("background-color" , "whitesmoke");
-			console.log ( $(".ct_list_pop:nth-child(6)" ).html() );//색 구분되며 출력 잘 되는지
+			//==> 아래와 같이 정의한 이유는 ??
+			$(".ct_list_pop:nth-child(4n+6)" ).css("background-color" , "whitesmoke");//색 구분되며 출력 잘 되는지
 	});		
 		
 </script>
@@ -164,7 +203,7 @@
 		</td>	
 	</tr>
 	<tr>
-		<td colspan="11" bgcolor="D6D7D6" height="1"></td>
+		<td id= "${vo.prodNo}" colspan="11" bgcolor="D6D7D6" height="1"></td>
 		</tr>
 	</c:forEach>
 </table>

@@ -73,12 +73,12 @@ public class ProductRestController {
 	@RequestMapping( value="json/updateProductView", method=RequestMethod.GET )
 	public Product updateProductView(@RequestParam("prodNo") int prodNo ,
 									HttpSession session )throws Exception{
-		System.out.println("/product/updateProductView: GET");
+		System.out.println("/product/json/updateProductView: GET");
 		return  productService.getProduct(prodNo);
 	}
 	
 	@RequestMapping( value="json/listProduct")
-	public  Map<String, Object> listProduct( @PathVariable Search search ) throws Exception{
+	public  Map<String, Object> listProduct( @ModelAttribute Search search ) throws Exception{
 System.out.println("/product/listProduct : GET / POST");
 		
 		if(search.getCurrentPage() ==0 ){
